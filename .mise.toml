@@ -1,0 +1,46 @@
+[tools]
+go = "1.21"
+
+[tasks.generate]
+description = "Generate code from OpenAPI spec"
+run = "go run github.com/ogen-go/ogen/cmd/ogen@latest --target internal/api --package api --clean openapi.yaml"
+
+[tasks.dev]
+description = "Run the API server in development mode with hot reload"
+run = "go run github.com/air-verse/air@latest"
+
+[tasks.docs]
+description = "Run the API documentation server (Swagger UI)"
+run = "go run cmd/docs/main.go"
+
+[tasks.build]
+description = "Build the API binary"
+run = "go build -o bin/api cmd/api/main.go"
+
+[tasks.test]
+description = "Run tests"
+run = "go test -v ./..."
+
+[tasks.lint]
+description = "Run linter"
+run = "golangci-lint run"
+
+[tasks.tidy]
+description = "Tidy Go modules"
+run = "go mod tidy"
+
+[tasks.docker-up]
+description = "Start Valkey with Docker Compose"
+run = "docker-compose up -d"
+
+[tasks.docker-down]
+description = "Stop Valkey Docker Compose"
+run = "docker-compose down"
+
+[tasks.docker-logs]
+description = "View Valkey logs"
+run = "docker-compose logs -f valkey"
+
+[env]
+PORT = "8080"
+CACHE_URL = "localhost:6379"

@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: Miracle74 API
+  version: 0.1.0
+  description: High-performance API with Redis caching and rate limiting
+  contact:
+    name: API Support
+    url: https://github.com/ethaan/miracle74-api
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.miracle74.com
+    description: Production
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check endpoint
+      description: Returns the current health status of the API
+      tags:
+        - health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /characters/{name}:
+    get:
+      operationId: getCharacter
+      summary: Get character data from miracle74.com
+      description: Fetches and returns character information from miracle74.com
+      tags:
+        - characters
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The character name
+          schema:
+            type: string
+            example: Oten
+      responses:
+        '200':
+          description: Successfully scraped character data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterResponse'
+        '404':
+          description: Character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /powergamers:
+    get:
+      operationId: getPowerGamers
+      summary: Get power gamers from miracle74.com
+      description: Fetches and returns power gamers (today's list). By default returns first page only, use include_all=true for all pages.
+      tags:
+        - powergamers
+      parameters:
+        - name: include_all
+          in: query
+          required: false
+          description: If true, fetches all pages. If false or omitted, fetches only first page.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Successfully scraped power gamers data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerGamersResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /insomniacs:
+    get:
+      operationId: getInsomniacs
+      summary: Get insomniacs from miracle74.com
+      description: Fetches and returns insomniacs (players with most online time). By default returns first page only, use include_all=true for all pages.
+      tags:
+        - insomniacs
+      parameters:
+        - name: include_all
+          in: query
+          required: false
+          description: If true, fetches all pages. If false or omitted, fetches only first page.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Successfully scraped insomniacs data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsomniacsResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - version
+      properties:
+        status:
+          type: string
+          example: healthy
+          enum:
+            - healthy
+            - degraded
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-12-17T10:30:00Z"
+        version:
+          type: string
+          example: "0.1.0"
+
+    CharacterResponse:
+      type: object
+      required:
+        - name
+        - sex
+        - is_premium
+      properties:
+        name:
+          type: string
+          example: Oten
+          description: Character name
+        sex:
+          type: string
+          example: male
+          description: Character sex
+        vocation:
+          type: string
+          example: Master Sorcerer
+          description: Character vocation
+        level:
+          type: integer
+          example: 81
+          description: Character level
+        residence:
+          type: string
+          example: Venore
+          description: Character residence city
+        guild:
+          type: string
+          example: Devastation
+          description: Guild name
+        guild_rank:
+          type: string
+          example: Earthquake
+          description: Rank within the guild
+        guild_url:
+          type: string
+          example: "https://miracle74.com/?subtopic=guilds&action=show&guild=386"
+          description: Guild profile URL
+        last_login:
+          type: string
+          format: date-time
+          example: "2025-12-17T05:09:00Z"
+          description: Last login timestamp
+        is_premium:
+          type: boolean
+          example: true
+          description: Premium account status
+        country:
+          type: string
+          example: br
+          description: Country code
+        deaths:
+          type: array
+          items:
+            $ref: '#/components/schemas/Death'
+          description: Recent character deaths
+
+    Death:
+      type: object
+      required:
+        - date
+        - level
+        - killed_by
+      properties:
+        date:
+          type: string
+          example: "4.12.2025, 3:41:16"
+          description: Death date and time
+        level:
+          type: integer
+          example: 74
+          description: Level at time of death
+        killed_by:
+          type: string
+          example: "Assassin and Dark Monk"
+          description: What killed the character
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: not_found
+          description: Error code
+        message:
+          type: string
+          example: Character not found
+          description: Human-readable error message
+
+    PowerGamersResponse:
+      type: object
+      required:
+        - power_gamers
+        - total
+      properties:
+        power_gamers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PowerGamer'
+          description: List of all power gamers
+        total:
+          type: integer
+          example: 100
+          description: Total number of power gamers
+
+    PowerGamer:
+      type: object
+      required:
+        - rank
+        - name
+        - vocation
+        - level
+        - today
+      properties:
+        rank:
+          type: integer
+          example: 1
+          description: Power gamer rank
+        name:
+          type: string
+          example: Oten
+          description: Character name
+        vocation:
+          type: string
+          example: Master Sorcerer
+          description: Character vocation
+        level:
+          type: integer
+          example: 81
+          description: Character level
+        today:
+          type: integer
+          example: 5
+          description: Levels gained today
+
+    InsomniacsResponse:
+      type: object
+      required:
+        - insomniacs
+        - total
+      properties:
+        insomniacs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Insomniac'
+          description: List of all insomniacs
+        total:
+          type: integer
+          example: 50
+          description: Total number of insomniacs
+
+    Insomniac:
+      type: object
+      required:
+        - rank
+        - name
+        - vocation
+        - level
+        - time_online
+      properties:
+        rank:
+          type: integer
+          example: 1
+          description: Insomniac rank
+        name:
+          type: string
+          example: Gordo Pobregay
+          description: Character name
+        country:
+          type: string
+          example: br
+          description: Country code
+        vocation:
+          type: string
+          example: Master Sorcerer
+          description: Character vocation
+        level:
+          type: integer
+          example: 81
+          description: Character level
+        time_online:
+          type: string
+          example: "14h:48m"
+          description: Time spent online
