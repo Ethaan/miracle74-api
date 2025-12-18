@@ -61,12 +61,10 @@ func NewClient(cacheURL string, ttl time.Duration) (*Client, error) {
 // - Redis URL: "redis://default:password@host:6379"
 // - Redis TLS: "rediss://user:pass@host:6379"
 func parseConnectionURL(cacheURL string) (valkey.ClientOption, error) {
-	// Check if it's a Redis URL format
 	if strings.HasPrefix(cacheURL, "redis://") || strings.HasPrefix(cacheURL, "rediss://") {
 		return parseRedisURL(cacheURL)
 	}
 
-	// Simple host:port format (local development)
 	return valkey.ClientOption{
 		InitAddress: []string{cacheURL},
 	}, nil
@@ -81,17 +79,16 @@ func parseRedisURL(redisURL string) (valkey.ClientOption, error) {
 	}
 
 	opt := valkey.ClientOption{
-		InitAddress: []string{u.Host},
+		InitAddress:  []string{u.Host},
+		DisableCache: true, // Upstash doesn't support CLIENT TRACKING
 	}
 
-	// Enable TLS for rediss:// or upstash.io hosts
-	if u.Scheme == "rediss" || strings.Contains(u.Host, "upstash.io") {
+	if u.Scheme == "rediss" {
 		opt.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
 		}
 	}
 
-	// Extract credentials
 	if u.User != nil {
 		if password, ok := u.User.Password(); ok {
 			opt.Password = password
