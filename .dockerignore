@@ -1,0 +1,20 @@
+# Git
+.git
+.gitignore
+
+# Development
+.air.toml
+.mise.toml
+docker-compose.yml
+tmp/
+
+# IDE
+.qodo
+.DS_Store
+
+# Documentation
+README.md
+openapi.yaml
+
+# Public assets (if not needed in container)
+public/

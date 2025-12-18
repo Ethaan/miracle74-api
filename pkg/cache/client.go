@@ -2,9 +2,12 @@ package cache
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/valkey-io/valkey-go"
@@ -28,9 +31,12 @@ func NewClient(cacheURL string, ttl time.Duration) (*Client, error) {
 		ttl = DefaultTTL
 	}
 
-	client, err := valkey.NewClient(valkey.ClientOption{
-		InitAddress: []string{cacheURL},
-	})
+	clientOpt, err := parseConnectionURL(cacheURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse cache URL: %w", err)
+	}
+
+	client, err := valkey.NewClient(clientOpt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Valkey client: %w", err)
 	}
@@ -40,13 +46,62 @@ func NewClient(cacheURL string, ttl time.Duration) (*Client, error) {
 
 	if err := client.Do(ctx, client.B().Ping().Build()).Error(); err != nil {
 		client.Close()
-		return nil, fmt.Errorf("failed to connect to Valkey: %w", err)
+		return nil, fmt.Errorf("failed to connect to cache: %w", err)
 	}
 
 	return &Client{
 		client: client,
 		ttl:    ttl,
 	}, nil
+}
+
+// parseConnectionURL parses the cache URL and returns appropriate client options
+// Supports formats:
+// - Simple: "localhost:6379"
+// - Redis URL: "redis://default:password@host:6379"
+// - Redis TLS: "rediss://user:pass@host:6379"
+func parseConnectionURL(cacheURL string) (valkey.ClientOption, error) {
+	// Check if it's a Redis URL format
+	if strings.HasPrefix(cacheURL, "redis://") || strings.HasPrefix(cacheURL, "rediss://") {
+		return parseRedisURL(cacheURL)
+	}
+
+	// Simple host:port format (local development)
+	return valkey.ClientOption{
+		InitAddress: []string{cacheURL},
+	}, nil
+}
+
+// parseRedisURL parses a Redis URL with credentials
+// Format: redis://[username][:password]@host:port
+func parseRedisURL(redisURL string) (valkey.ClientOption, error) {
+	u, err := url.Parse(redisURL)
+	if err != nil {
+		return valkey.ClientOption{}, fmt.Errorf("invalid Redis URL: %w", err)
+	}
+
+	opt := valkey.ClientOption{
+		InitAddress: []string{u.Host},
+	}
+
+	// Enable TLS for rediss:// or upstash.io hosts
+	if u.Scheme == "rediss" || strings.Contains(u.Host, "upstash.io") {
+		opt.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
+	}
+
+	// Extract credentials
+	if u.User != nil {
+		if password, ok := u.User.Password(); ok {
+			opt.Password = password
+		}
+		if username := u.User.Username(); username != "" && username != "default" {
+			opt.Username = username
+		}
+	}
+
+	return opt, nil
 }
 
 func (c *Client) Get(ctx context.Context, key string, dest interface{}) error {
