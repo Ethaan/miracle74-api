@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 	"time"
@@ -111,7 +112,10 @@ func (c *Client) Get(ctx context.Context, key string, dest interface{}) error {
 	}
 
 	if err := json.Unmarshal([]byte(result), dest); err != nil {
-		return fmt.Errorf("failed to unmarshal cached value: %w", err)
+		// Cache data is corrupted - delete it and treat as cache miss
+		log.Printf("Corrupted cache data for key %s, invalidating: %v", key, err)
+		_ = c.Delete(ctx, key) // Best effort delete
+		return ErrCacheMiss
 	}
 
 	return nil
