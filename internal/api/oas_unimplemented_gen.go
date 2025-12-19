@@ -22,6 +22,15 @@ func (UnimplementedHandler) GetCharacter(ctx context.Context, params GetCharacte
 	return r, ht.ErrNotImplemented
 }
 
+// GetGuild implements getGuild operation.
+//
+// Fetches and returns guild information including all members.
+//
+// GET /guilds/{guildId}
+func (UnimplementedHandler) GetGuild(ctx context.Context, params GetGuildParams) (r GetGuildRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetHealth implements getHealth operation.
 //
 // Returns the current health status of the API.

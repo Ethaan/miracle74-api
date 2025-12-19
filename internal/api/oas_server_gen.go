@@ -14,6 +14,12 @@ type Handler interface {
 	//
 	// GET /characters/{name}
 	GetCharacter(ctx context.Context, params GetCharacterParams) (GetCharacterRes, error)
+	// GetGuild implements getGuild operation.
+	//
+	// Fetches and returns guild information including all members.
+	//
+	// GET /guilds/{guildId}
+	GetGuild(ctx context.Context, params GetGuildParams) (GetGuildRes, error)
 	// GetHealth implements getHealth operation.
 	//
 	// Returns the current health status of the API.

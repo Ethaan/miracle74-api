@@ -541,3 +541,97 @@ func findFirstLink(n *html.Node) *html.Node {
 
 	return nil
 }
+
+func parseGuildData(doc *html.Node, guildID int) (*types.Guild, error) {
+	table := findGuildMembersTable(doc)
+	if table == nil {
+		return nil, fmt.Errorf("guild members table not found")
+	}
+
+	rows := findAllTRs(table)
+	if len(rows) == 0 {
+		return nil, fmt.Errorf("no rows found in guild members table")
+	}
+
+	var members []types.GuildMember
+
+	for i, row := range rows {
+		if i == 0 {
+			text := getTextContent(row)
+			if strings.Contains(text, "Rank") && strings.Contains(text, "Name") {
+				continue
+			}
+		}
+
+		cells := findAllTDs(row)
+		if len(cells) < 5 {
+			continue
+		}
+
+		rank := strings.TrimSpace(getTextContent(cells[0]))
+		nameCell := cells[1]
+		vocation := strings.TrimSpace(getTextContent(cells[2]))
+		levelStr := strings.TrimSpace(getTextContent(cells[3]))
+		statusCell := cells[4]
+
+		if rank == "" {
+			continue
+		}
+
+		name := extractNameFromLink(nameCell)
+		if name == "" {
+			fmt.Printf("Warning: failed to extract name from cell\n")
+			continue
+		}
+
+		level, err := strconv.Atoi(levelStr)
+		if err != nil {
+			fmt.Printf("Warning: failed to parse level '%s': %v\n", levelStr, err)
+			continue
+		}
+
+		status := extractGuildMemberStatus(statusCell)
+
+		members = append(members, types.GuildMember{
+			Rank:     rank,
+			Name:     name,
+			Vocation: vocation,
+			Level:    level,
+			Status:   status,
+		})
+	}
+
+	return &types.Guild{
+		GuildID: guildID,
+		Members: members,
+	}, nil
+}
+
+func findGuildMembersTable(n *html.Node) *html.Node {
+	if n.Type == html.ElementNode && n.Data == "table" {
+		if hasClass(n, "TableContent") && hasClass(n, "InnerBorder") {
+			tbody := findTBody(n)
+			if tbody != nil {
+				return n
+			}
+		}
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if result := findGuildMembersTable(c); result != nil {
+			return result
+		}
+	}
+
+	return nil
+}
+
+func extractGuildMemberStatus(cell *html.Node) string {
+	text := strings.TrimSpace(getTextContent(cell))
+
+	if strings.Contains(text, "Online") || strings.Contains(text, "online") {
+		return "Online"
+	}
+
+	return "Offline"
+}

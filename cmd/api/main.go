@@ -35,14 +35,16 @@ func main() {
 	characterRepo := repo.NewCharacterRepo(cacheClient)
 	powerGamersRepo := repo.NewPowerGamersRepo(cacheClient)
 	insomniacsRepo := repo.NewInsomniacsRepo(cacheClient)
+	guildRepo := repo.NewGuildRepo(cacheClient)
 
 	// Services
 	characterService := services.NewCharacterService(characterRepo)
 	powerGamersService := services.NewPowerGamersService(powerGamersRepo)
 	insomniacsService := services.NewInsomniacsService(insomniacsRepo)
+	guildService := services.NewGuildService(guildRepo)
 
 	// Handlers
-	handler := handlers.NewHandler(characterService, powerGamersService, insomniacsService)
+	handler := handlers.NewHandler(characterService, powerGamersService, insomniacsService, guildService)
 
 	srv, err := api.NewServer(handler)
 	if err != nil {

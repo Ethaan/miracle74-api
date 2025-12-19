@@ -80,6 +80,72 @@ func decodeGetCharacterParams(args [1]string, argsEscaped bool, r *http.Request)
 	return params, nil
 }
 
+// GetGuildParams is parameters of getGuild operation.
+type GetGuildParams struct {
+	// The guild ID from the miracle74.com website.
+	GuildId int
+}
+
+func unpackGetGuildParams(packed middleware.Parameters) (params GetGuildParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "guildId",
+			In:   "path",
+		}
+		params.GuildId = packed[key].(int)
+	}
+	return params
+}
+
+func decodeGetGuildParams(args [1]string, argsEscaped bool, r *http.Request) (params GetGuildParams, _ error) {
+	// Decode path: guildId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "guildId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt(val)
+				if err != nil {
+					return err
+				}
+
+				params.GuildId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "guildId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetInsomniacsParams is parameters of getInsomniacs operation.
 type GetInsomniacsParams struct {
 	// If true, fetches all pages. If false or omitted, fetches only first page.

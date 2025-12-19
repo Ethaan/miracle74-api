@@ -92,6 +92,37 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
+			case 'g': // Prefix: "guilds/"
+
+				if l := len("guilds/"); len(elem) >= l && elem[0:l] == "guilds/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "guildId"
+				// Leaf parameter, slashes are prohibited
+				idx := strings.IndexByte(elem, '/')
+				if idx >= 0 {
+					break
+				}
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetGuildRequest([1]string{
+							args[0],
+						}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+
 			case 'h': // Prefix: "health"
 
 				if l := len("health"); len(elem) >= l && elem[0:l] == "health" {
@@ -278,6 +309,40 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.operationID = "getCharacter"
 						r.operationGroup = ""
 						r.pathPattern = "/characters/{name}"
+						r.args = args
+						r.count = 1
+						return r, true
+					default:
+						return
+					}
+				}
+
+			case 'g': // Prefix: "guilds/"
+
+				if l := len("guilds/"); len(elem) >= l && elem[0:l] == "guilds/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				// Param: "guildId"
+				// Leaf parameter, slashes are prohibited
+				idx := strings.IndexByte(elem, '/')
+				if idx >= 0 {
+					break
+				}
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = GetGuildOperation
+						r.summary = "Get guild data from miracle74.com"
+						r.operationID = "getGuild"
+						r.operationGroup = ""
+						r.pathPattern = "/guilds/{guildId}"
 						r.args = args
 						r.count = 1
 						return r, true

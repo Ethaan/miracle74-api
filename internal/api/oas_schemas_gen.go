@@ -237,6 +237,120 @@ type GetCharacterNotFound ErrorResponse
 
 func (*GetCharacterNotFound) getCharacterRes() {}
 
+type GetGuildInternalServerError ErrorResponse
+
+func (*GetGuildInternalServerError) getGuildRes() {}
+
+type GetGuildNotFound ErrorResponse
+
+func (*GetGuildNotFound) getGuildRes() {}
+
+// Ref: #/components/schemas/GuildMember
+type GuildMember struct {
+	// Guild rank title.
+	Rank string `json:"rank"`
+	// Character name.
+	Name string `json:"name"`
+	// Character vocation.
+	Vocation string `json:"vocation"`
+	// Character level.
+	Level int `json:"level"`
+	// Player online status.
+	Status string `json:"status"`
+}
+
+// GetRank returns the value of Rank.
+func (s *GuildMember) GetRank() string {
+	return s.Rank
+}
+
+// GetName returns the value of Name.
+func (s *GuildMember) GetName() string {
+	return s.Name
+}
+
+// GetVocation returns the value of Vocation.
+func (s *GuildMember) GetVocation() string {
+	return s.Vocation
+}
+
+// GetLevel returns the value of Level.
+func (s *GuildMember) GetLevel() int {
+	return s.Level
+}
+
+// GetStatus returns the value of Status.
+func (s *GuildMember) GetStatus() string {
+	return s.Status
+}
+
+// SetRank sets the value of Rank.
+func (s *GuildMember) SetRank(val string) {
+	s.Rank = val
+}
+
+// SetName sets the value of Name.
+func (s *GuildMember) SetName(val string) {
+	s.Name = val
+}
+
+// SetVocation sets the value of Vocation.
+func (s *GuildMember) SetVocation(val string) {
+	s.Vocation = val
+}
+
+// SetLevel sets the value of Level.
+func (s *GuildMember) SetLevel(val int) {
+	s.Level = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GuildMember) SetStatus(val string) {
+	s.Status = val
+}
+
+// Ref: #/components/schemas/GuildResponse
+type GuildResponse struct {
+	// Guild ID.
+	GuildID int `json:"guild_id"`
+	// List of all guild members.
+	Members []GuildMember `json:"members"`
+	// Total number of guild members.
+	Total int `json:"total"`
+}
+
+// GetGuildID returns the value of GuildID.
+func (s *GuildResponse) GetGuildID() int {
+	return s.GuildID
+}
+
+// GetMembers returns the value of Members.
+func (s *GuildResponse) GetMembers() []GuildMember {
+	return s.Members
+}
+
+// GetTotal returns the value of Total.
+func (s *GuildResponse) GetTotal() int {
+	return s.Total
+}
+
+// SetGuildID sets the value of GuildID.
+func (s *GuildResponse) SetGuildID(val int) {
+	s.GuildID = val
+}
+
+// SetMembers sets the value of Members.
+func (s *GuildResponse) SetMembers(val []GuildMember) {
+	s.Members = val
+}
+
+// SetTotal sets the value of Total.
+func (s *GuildResponse) SetTotal(val int) {
+	s.Total = val
+}
+
+func (*GuildResponse) getGuildRes() {}
+
 // Ref: #/components/schemas/HealthResponse
 type HealthResponse struct {
 	Status    HealthResponseStatus `json:"status"`

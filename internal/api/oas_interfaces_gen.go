@@ -5,6 +5,10 @@ type GetCharacterRes interface {
 	getCharacterRes()
 }
 
+type GetGuildRes interface {
+	getGuildRes()
+}
+
 type GetInsomniacsRes interface {
 	getInsomniacsRes()
 }

@@ -33,6 +33,12 @@ type Invoker interface {
 	//
 	// GET /characters/{name}
 	GetCharacter(ctx context.Context, params GetCharacterParams) (GetCharacterRes, error)
+	// GetGuild invokes getGuild operation.
+	//
+	// Fetches and returns guild information including all members.
+	//
+	// GET /guilds/{guildId}
+	GetGuild(ctx context.Context, params GetGuildParams) (GetGuildRes, error)
 	// GetHealth invokes getHealth operation.
 	//
 	// Returns the current health status of the API.
@@ -182,6 +188,97 @@ func (c *Client) sendGetCharacter(ctx context.Context, params GetCharacterParams
 
 	stage = "DecodeResponse"
 	result, err := decodeGetCharacterResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetGuild invokes getGuild operation.
+//
+// Fetches and returns guild information including all members.
+//
+// GET /guilds/{guildId}
+func (c *Client) GetGuild(ctx context.Context, params GetGuildParams) (GetGuildRes, error) {
+	res, err := c.sendGetGuild(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetGuild(ctx context.Context, params GetGuildParams) (res GetGuildRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getGuild"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/guilds/{guildId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetGuildOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/guilds/"
+	{
+		// Encode "guildId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "guildId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.IntToString(params.GuildId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetGuildResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

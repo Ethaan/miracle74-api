@@ -122,6 +122,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /guilds/{guildId}:
+    get:
+      operationId: getGuild
+      summary: Get guild data from miracle74.com
+      description: Fetches and returns guild information including all members
+      tags:
+        - guilds
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          description: The guild ID from the miracle74.com website
+          schema:
+            type: integer
+            example: 386
+      responses:
+        '200':
+          description: Successfully scraped guild data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuildResponse'
+        '404':
+          description: Guild not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     HealthResponse:
@@ -333,3 +368,54 @@ components:
           type: string
           example: "14h:48m"
           description: Time spent online
+
+    GuildResponse:
+      type: object
+      required:
+        - guild_id
+        - members
+        - total
+      properties:
+        guild_id:
+          type: integer
+          example: 386
+          description: Guild ID
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuildMember'
+          description: List of all guild members
+        total:
+          type: integer
+          example: 50
+          description: Total number of guild members
+
+    GuildMember:
+      type: object
+      required:
+        - rank
+        - name
+        - vocation
+        - level
+        - status
+      properties:
+        rank:
+          type: string
+          example: Devastator
+          description: Guild rank title
+        name:
+          type: string
+          example: Oten
+          description: Character name
+        vocation:
+          type: string
+          example: Royal Paladin
+          description: Character vocation
+        level:
+          type: integer
+          example: 217
+          description: Character level
+        status:
+          type: string
+          example: Online
+          description: Player online status

@@ -12,13 +12,15 @@ type Handler struct {
 	characterService   *services.CharacterService
 	powerGamersService *services.PowerGamersService
 	insomniacsService  *services.InsomniacsService
+	guildService       *services.GuildService
 }
 
-func NewHandler(characterService *services.CharacterService, powerGamersService *services.PowerGamersService, insomniacsService *services.InsomniacsService) *Handler {
+func NewHandler(characterService *services.CharacterService, powerGamersService *services.PowerGamersService, insomniacsService *services.InsomniacsService, guildService *services.GuildService) *Handler {
 	return &Handler{
 		characterService:   characterService,
 		powerGamersService: powerGamersService,
 		insomniacsService:  insomniacsService,
+		guildService:       guildService,
 	}
 }
 

@@ -23,19 +23,3 @@ type Death struct {
 	KilledBy string `json:"killed_by"`
 }
 
-type PowerGamer struct {
-	Rank     int    `json:"rank"`
-	Name     string `json:"name"`
-	Vocation string `json:"vocation"`
-	Level    int    `json:"level"`
-	Today    int    `json:"today"`
-}
-
-type Insomniac struct {
-	Rank       int    `json:"rank"`
-	Name       string `json:"name"`
-	Country    string `json:"country,omitempty"`
-	Vocation   string `json:"vocation"`
-	Level      int    `json:"level"`
-	TimeOnline string `json:"time_online"`
-}

@@ -255,6 +255,68 @@ func (c *Client) parseInsomniacsHTML(htmlContent []byte) ([]types.Insomniac, err
 	return insomniacs, nil
 }
 
+func (c *Client) ScrapeGuild(guildID int) (*types.Guild, error) {
+	u, err := url.Parse(c.baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse base URL: %w", err)
+	}
+
+	q := u.Query()
+	q.Set("subtopic", "guilds")
+	q.Set("action", "show")
+	q.Set("guild", fmt.Sprintf("%d", guildID))
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "Miracle74-API/0.1.0")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch page: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if err := c.saveHTMLForDebug(body, fmt.Sprintf("guild-%d", guildID)); err != nil {
+		fmt.Printf("Warning: failed to save HTML for debugging: %v\n", err)
+	}
+
+	guild, err := c.parseGuildHTML(body, guildID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse guild data: %w", err)
+	}
+
+	return guild, nil
+}
+
+func (c *Client) parseGuildHTML(htmlContent []byte, guildID int) (*types.Guild, error) {
+	doc, err := html.Parse(bytes.NewReader(htmlContent))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse HTML: %w", err)
+	}
+
+	guild, err := parseGuildData(doc, guildID)
+	if err != nil {
+		fmt.Printf("DEBUG: Parser error: %v\n", err)
+		return nil, fmt.Errorf("failed to extract guild data: %w", err)
+	}
+
+	fmt.Printf("DEBUG: Parsed guild with %d members\n", len(guild.Members))
+	return guild, nil
+}
+
 func (c *Client) saveHTMLForDebug(htmlContent []byte, name string) error {
 	publicDir := "public"
 
