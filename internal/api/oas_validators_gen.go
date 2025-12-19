@@ -7,6 +7,48 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+func (s GetPowerGamersList) Validate() error {
+	switch s {
+	case "today":
+		return nil
+	case "lastday":
+		return nil
+	case "last2days":
+		return nil
+	case "last3days":
+		return nil
+	case "last4days":
+		return nil
+	case "last5days":
+		return nil
+	case "last6days":
+		return nil
+	case "last7days":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s GetPowerGamersVocation) Validate() error {
+	switch s {
+	case "":
+		return nil
+	case "0":
+		return nil
+	case "1":
+		return nil
+	case "2":
+		return nil
+	case "3":
+		return nil
+	case "4":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *GuildResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer

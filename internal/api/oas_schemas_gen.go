@@ -245,6 +245,158 @@ type GetGuildNotFound ErrorResponse
 
 func (*GetGuildNotFound) getGuildRes() {}
 
+type GetPowerGamersList string
+
+const (
+	GetPowerGamersListToday     GetPowerGamersList = "today"
+	GetPowerGamersListLastday   GetPowerGamersList = "lastday"
+	GetPowerGamersListLast2days GetPowerGamersList = "last2days"
+	GetPowerGamersListLast3days GetPowerGamersList = "last3days"
+	GetPowerGamersListLast4days GetPowerGamersList = "last4days"
+	GetPowerGamersListLast5days GetPowerGamersList = "last5days"
+	GetPowerGamersListLast6days GetPowerGamersList = "last6days"
+	GetPowerGamersListLast7days GetPowerGamersList = "last7days"
+)
+
+// AllValues returns all GetPowerGamersList values.
+func (GetPowerGamersList) AllValues() []GetPowerGamersList {
+	return []GetPowerGamersList{
+		GetPowerGamersListToday,
+		GetPowerGamersListLastday,
+		GetPowerGamersListLast2days,
+		GetPowerGamersListLast3days,
+		GetPowerGamersListLast4days,
+		GetPowerGamersListLast5days,
+		GetPowerGamersListLast6days,
+		GetPowerGamersListLast7days,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetPowerGamersList) MarshalText() ([]byte, error) {
+	switch s {
+	case GetPowerGamersListToday:
+		return []byte(s), nil
+	case GetPowerGamersListLastday:
+		return []byte(s), nil
+	case GetPowerGamersListLast2days:
+		return []byte(s), nil
+	case GetPowerGamersListLast3days:
+		return []byte(s), nil
+	case GetPowerGamersListLast4days:
+		return []byte(s), nil
+	case GetPowerGamersListLast5days:
+		return []byte(s), nil
+	case GetPowerGamersListLast6days:
+		return []byte(s), nil
+	case GetPowerGamersListLast7days:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetPowerGamersList) UnmarshalText(data []byte) error {
+	switch GetPowerGamersList(data) {
+	case GetPowerGamersListToday:
+		*s = GetPowerGamersListToday
+		return nil
+	case GetPowerGamersListLastday:
+		*s = GetPowerGamersListLastday
+		return nil
+	case GetPowerGamersListLast2days:
+		*s = GetPowerGamersListLast2days
+		return nil
+	case GetPowerGamersListLast3days:
+		*s = GetPowerGamersListLast3days
+		return nil
+	case GetPowerGamersListLast4days:
+		*s = GetPowerGamersListLast4days
+		return nil
+	case GetPowerGamersListLast5days:
+		*s = GetPowerGamersListLast5days
+		return nil
+	case GetPowerGamersListLast6days:
+		*s = GetPowerGamersListLast6days
+		return nil
+	case GetPowerGamersListLast7days:
+		*s = GetPowerGamersListLast7days
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetPowerGamersVocation string
+
+const (
+	GetPowerGamersVocationEmpty GetPowerGamersVocation = ""
+	GetPowerGamersVocation0     GetPowerGamersVocation = "0"
+	GetPowerGamersVocation1     GetPowerGamersVocation = "1"
+	GetPowerGamersVocation2     GetPowerGamersVocation = "2"
+	GetPowerGamersVocation3     GetPowerGamersVocation = "3"
+	GetPowerGamersVocation4     GetPowerGamersVocation = "4"
+)
+
+// AllValues returns all GetPowerGamersVocation values.
+func (GetPowerGamersVocation) AllValues() []GetPowerGamersVocation {
+	return []GetPowerGamersVocation{
+		GetPowerGamersVocationEmpty,
+		GetPowerGamersVocation0,
+		GetPowerGamersVocation1,
+		GetPowerGamersVocation2,
+		GetPowerGamersVocation3,
+		GetPowerGamersVocation4,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetPowerGamersVocation) MarshalText() ([]byte, error) {
+	switch s {
+	case GetPowerGamersVocationEmpty:
+		return []byte(s), nil
+	case GetPowerGamersVocation0:
+		return []byte(s), nil
+	case GetPowerGamersVocation1:
+		return []byte(s), nil
+	case GetPowerGamersVocation2:
+		return []byte(s), nil
+	case GetPowerGamersVocation3:
+		return []byte(s), nil
+	case GetPowerGamersVocation4:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetPowerGamersVocation) UnmarshalText(data []byte) error {
+	switch GetPowerGamersVocation(data) {
+	case GetPowerGamersVocationEmpty:
+		*s = GetPowerGamersVocationEmpty
+		return nil
+	case GetPowerGamersVocation0:
+		*s = GetPowerGamersVocation0
+		return nil
+	case GetPowerGamersVocation1:
+		*s = GetPowerGamersVocation1
+		return nil
+	case GetPowerGamersVocation2:
+		*s = GetPowerGamersVocation2
+		return nil
+	case GetPowerGamersVocation3:
+		*s = GetPowerGamersVocation3
+		return nil
+	case GetPowerGamersVocation4:
+		*s = GetPowerGamersVocation4
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/GuildMember
 type GuildMember struct {
 	// Guild rank title.
@@ -621,6 +773,98 @@ func (o OptDateTime) Get() (v time.Time, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetPowerGamersList returns new OptGetPowerGamersList with value set to v.
+func NewOptGetPowerGamersList(v GetPowerGamersList) OptGetPowerGamersList {
+	return OptGetPowerGamersList{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetPowerGamersList is optional GetPowerGamersList.
+type OptGetPowerGamersList struct {
+	Value GetPowerGamersList
+	Set   bool
+}
+
+// IsSet returns true if OptGetPowerGamersList was set.
+func (o OptGetPowerGamersList) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetPowerGamersList) Reset() {
+	var v GetPowerGamersList
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetPowerGamersList) SetTo(v GetPowerGamersList) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetPowerGamersList) Get() (v GetPowerGamersList, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetPowerGamersList) Or(d GetPowerGamersList) GetPowerGamersList {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetPowerGamersVocation returns new OptGetPowerGamersVocation with value set to v.
+func NewOptGetPowerGamersVocation(v GetPowerGamersVocation) OptGetPowerGamersVocation {
+	return OptGetPowerGamersVocation{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetPowerGamersVocation is optional GetPowerGamersVocation.
+type OptGetPowerGamersVocation struct {
+	Value GetPowerGamersVocation
+	Set   bool
+}
+
+// IsSet returns true if OptGetPowerGamersVocation was set.
+func (o OptGetPowerGamersVocation) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetPowerGamersVocation) Reset() {
+	var v GetPowerGamersVocation
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetPowerGamersVocation) SetTo(v GetPowerGamersVocation) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetPowerGamersVocation) Get() (v GetPowerGamersVocation, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetPowerGamersVocation) Or(d GetPowerGamersVocation) GetPowerGamersVocation {
 	if v, ok := o.Get(); ok {
 		return v
 	}

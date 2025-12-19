@@ -24,13 +24,10 @@ func NewPowerGamersService(powerGamersRepo *repo.PowerGamersRepo) *PowerGamersSe
 	}
 }
 
-func (s *PowerGamersService) GetPowerGamers(ctx context.Context, includeAll bool) ([]types.PowerGamer, error) {
-	powerGamers, err := s.repo.Get(ctx, includeAll)
+func (s *PowerGamersService) GetPowerGamers(ctx context.Context, includeAll bool, list string, vocation string) ([]types.PowerGamer, error) {
+	powerGamers, err := s.repo.Get(ctx, includeAll, list, vocation)
 	if err == nil {
-		cacheKey := "powergamers:today:page:1"
-		if includeAll {
-			cacheKey = "powergamers:today:all"
-		}
+		cacheKey := s.repo.BuildKey(includeAll, list, vocation)
 		log.Printf("Cache hit for %s", cacheKey)
 		return powerGamers, nil
 	}
@@ -38,19 +35,16 @@ func (s *PowerGamersService) GetPowerGamers(ctx context.Context, includeAll bool
 	if !errors.Is(err, cache.ErrCacheMiss) {
 		log.Printf("Cache error: %v", err)
 	} else {
-		cacheKey := "powergamers:today:page:1"
-		if includeAll {
-			cacheKey = "powergamers:today:all"
-		}
+		cacheKey := s.repo.BuildKey(includeAll, list, vocation)
 		log.Printf("Cache miss for %s", cacheKey)
 	}
 
-	powerGamers, err = s.client.ScrapePowerGamers(includeAll)
+	powerGamers, err = s.client.ScrapePowerGamers(includeAll, list, vocation)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scrape power gamers: %w", err)
 	}
 
-	if err := s.repo.Set(ctx, powerGamers, includeAll); err != nil {
+	if err := s.repo.Set(ctx, powerGamers, includeAll, list, vocation); err != nil {
 		log.Printf("Failed to cache power gamers: %v", err)
 	} else {
 		log.Printf("Cached %d power gamers", len(powerGamers))

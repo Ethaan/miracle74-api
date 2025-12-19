@@ -220,6 +220,16 @@ func decodeGetInsomniacsParams(args [0]string, argsEscaped bool, r *http.Request
 type GetPowerGamersParams struct {
 	// If true, fetches all pages. If false or omitted, fetches only first page.
 	IncludeAll OptBool `json:",omitempty,omitzero"`
+	// Time period for power gamers list.
+	List OptGetPowerGamersList `json:",omitempty,omitzero"`
+	// Filter by vocation. Values:
+	// - "" (empty/omitted): All vocations
+	// - "0": No Vocation
+	// - "1": Sorcerers
+	// - "2": Druids
+	// - "3": Paladins
+	// - "4": Knights.
+	Vocation OptGetPowerGamersVocation `json:",omitempty,omitzero"`
 }
 
 func unpackGetPowerGamersParams(packed middleware.Parameters) (params GetPowerGamersParams) {
@@ -230,6 +240,24 @@ func unpackGetPowerGamersParams(packed middleware.Parameters) (params GetPowerGa
 		}
 		if v, ok := packed[key]; ok {
 			params.IncludeAll = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "list",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.List = v.(OptGetPowerGamersList)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "vocation",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Vocation = v.(OptGetPowerGamersVocation)
 		}
 	}
 	return params
@@ -279,6 +307,128 @@ func decodeGetPowerGamersParams(args [0]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "include_all",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: list.
+	{
+		val := GetPowerGamersList("today")
+		params.List.SetTo(val)
+	}
+	// Decode query: list.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "list",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotListVal GetPowerGamersList
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotListVal = GetPowerGamersList(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.List.SetTo(paramsDotListVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.List.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "list",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: vocation.
+	{
+		val := GetPowerGamersVocation("")
+		params.Vocation.SetTo(val)
+	}
+	// Decode query: vocation.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "vocation",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotVocationVal GetPowerGamersVocation
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotVocationVal = GetPowerGamersVocation(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Vocation.SetTo(paramsDotVocationVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Vocation.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "vocation",
 			In:   "query",
 			Err:  err,
 		}

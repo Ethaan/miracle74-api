@@ -35,8 +35,8 @@ type Handler interface {
 	GetInsomniacs(ctx context.Context, params GetInsomniacsParams) (GetInsomniacsRes, error)
 	// GetPowerGamers implements getPowerGamers operation.
 	//
-	// Fetches and returns power gamers (today's list). By default returns first page only, use
-	// include_all=true for all pages.
+	// Fetches and returns power gamers. By default returns first page only, use include_all=true for all
+	// pages. Can filter by time period and vocation.
 	//
 	// GET /powergamers
 	GetPowerGamers(ctx context.Context, params GetPowerGamersParams) (GetPowerGamersRes, error)

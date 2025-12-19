@@ -54,8 +54,8 @@ type Invoker interface {
 	GetInsomniacs(ctx context.Context, params GetInsomniacsParams) (GetInsomniacsRes, error)
 	// GetPowerGamers invokes getPowerGamers operation.
 	//
-	// Fetches and returns power gamers (today's list). By default returns first page only, use
-	// include_all=true for all pages.
+	// Fetches and returns power gamers. By default returns first page only, use include_all=true for all
+	// pages. Can filter by time period and vocation.
 	//
 	// GET /powergamers
 	GetPowerGamers(ctx context.Context, params GetPowerGamersParams) (GetPowerGamersRes, error)
@@ -457,8 +457,8 @@ func (c *Client) sendGetInsomniacs(ctx context.Context, params GetInsomniacsPara
 
 // GetPowerGamers invokes getPowerGamers operation.
 //
-// Fetches and returns power gamers (today's list). By default returns first page only, use
-// include_all=true for all pages.
+// Fetches and returns power gamers. By default returns first page only, use include_all=true for all
+// pages. Can filter by time period and vocation.
 //
 // GET /powergamers
 func (c *Client) GetPowerGamers(ctx context.Context, params GetPowerGamersParams) (GetPowerGamersRes, error) {
@@ -520,6 +520,40 @@ func (c *Client) sendGetPowerGamers(ctx context.Context, params GetPowerGamersPa
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.IncludeAll.Get(); ok {
 				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "list" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "list",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.List.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "vocation" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "vocation",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Vocation.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
 			}
 			return nil
 		}); err != nil {

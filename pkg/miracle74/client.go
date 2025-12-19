@@ -88,7 +88,7 @@ func (c *Client) parseCharacterHTML(htmlContent []byte, name string) (*types.Cha
 	return character, nil
 }
 
-func (c *Client) ScrapePowerGamers(includeAll bool) ([]types.PowerGamer, error) {
+func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string) ([]types.PowerGamer, error) {
 	var allPowerGamers []types.PowerGamer
 
 	maxPages := 1
@@ -97,7 +97,7 @@ func (c *Client) ScrapePowerGamers(includeAll bool) ([]types.PowerGamer, error) 
 	}
 
 	for page := 1; page <= maxPages; page++ {
-		fmt.Printf("Scraping power gamers page %d...\n", page)
+		fmt.Printf("Scraping power gamers page %d (list=%s, vocation=%s)...\n", page, list, vocation)
 
 		u, err := url.Parse(c.baseURL)
 		if err != nil {
@@ -106,7 +106,10 @@ func (c *Client) ScrapePowerGamers(includeAll bool) ([]types.PowerGamer, error) 
 
 		q := u.Query()
 		q.Set("subtopic", "powergamers")
-		q.Set("list", "today")
+		q.Set("list", list)
+		if vocation != "" {
+			q.Set("vocation", vocation)
+		}
 		q.Set("page", fmt.Sprintf("%d", page))
 		u.RawQuery = q.Encode()
 

@@ -8,8 +8,10 @@ import (
 
 func (h *Handler) GetPowerGamers(ctx context.Context, params api.GetPowerGamersParams) (api.GetPowerGamersRes, error) {
 	includeAll := params.IncludeAll.Value
+	list := string(params.List.Value)
+	vocation := string(params.Vocation.Value)
 
-	powerGamers, err := h.powerGamersService.GetPowerGamers(ctx, includeAll)
+	powerGamers, err := h.powerGamersService.GetPowerGamers(ctx, includeAll, list, vocation)
 	if err != nil {
 		return &api.ErrorResponse{
 			Error:   "fetch_failed",

@@ -582,8 +582,8 @@ func (s *Server) handleGetInsomniacsRequest(args [0]string, argsEscaped bool, w 
 
 // handleGetPowerGamersRequest handles getPowerGamers operation.
 //
-// Fetches and returns power gamers (today's list). By default returns first page only, use
-// include_all=true for all pages.
+// Fetches and returns power gamers. By default returns first page only, use include_all=true for all
+// pages. Can filter by time period and vocation.
 //
 // GET /powergamers
 func (s *Server) handleGetPowerGamersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -682,6 +682,14 @@ func (s *Server) handleGetPowerGamersRequest(args [0]string, argsEscaped bool, w
 					Name: "include_all",
 					In:   "query",
 				}: params.IncludeAll,
+				{
+					Name: "list",
+					In:   "query",
+				}: params.List,
+				{
+					Name: "vocation",
+					In:   "query",
+				}: params.Vocation,
 			},
 			Raw: r,
 		}

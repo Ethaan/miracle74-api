@@ -68,7 +68,7 @@ paths:
     get:
       operationId: getPowerGamers
       summary: Get power gamers from miracle74.com
-      description: Fetches and returns power gamers (today's list). By default returns first page only, use include_all=true for all pages.
+      description: Fetches and returns power gamers. By default returns first page only, use include_all=true for all pages. Can filter by time period and vocation.
       tags:
         - powergamers
       parameters:
@@ -79,6 +79,29 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: list
+          in: query
+          required: false
+          description: Time period for power gamers list
+          schema:
+            type: string
+            enum: [today, lastday, last2days, last3days, last4days, last5days, last6days, last7days]
+            default: today
+        - name: vocation
+          in: query
+          required: false
+          description: |
+            Filter by vocation. Values:
+            - "" (empty/omitted): All vocations
+            - "0": No Vocation
+            - "1": Sorcerers
+            - "2": Druids
+            - "3": Paladins
+            - "4": Knights
+          schema:
+            type: string
+            enum: ["", "0", "1", "2", "3", "4"]
+            default: ""
       responses:
         '200':
           description: Successfully scraped power gamers data

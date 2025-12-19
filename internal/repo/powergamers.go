@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	PowerGamersTTL = 1 * time.Minute
+	PowerGamersTTL = 5 * time.Minute
 )
 
 type PowerGamersRepo struct {
@@ -22,8 +22,8 @@ func NewPowerGamersRepo(cacheClient *cache.Client) *PowerGamersRepo {
 	}
 }
 
-func (r *PowerGamersRepo) Get(ctx context.Context, includeAll bool) ([]types.PowerGamer, error) {
-	key := r.buildKey(includeAll)
+func (r *PowerGamersRepo) Get(ctx context.Context, includeAll bool, list string, vocation string) ([]types.PowerGamer, error) {
+	key := r.BuildKey(includeAll, list, vocation)
 
 	var powerGamers []types.PowerGamer
 	if err := r.cache.Get(ctx, key, &powerGamers); err != nil {
@@ -33,19 +33,26 @@ func (r *PowerGamersRepo) Get(ctx context.Context, includeAll bool) ([]types.Pow
 	return powerGamers, nil
 }
 
-func (r *PowerGamersRepo) Set(ctx context.Context, powerGamers []types.PowerGamer, includeAll bool) error {
-	key := r.buildKey(includeAll)
+func (r *PowerGamersRepo) Set(ctx context.Context, powerGamers []types.PowerGamer, includeAll bool, list string, vocation string) error {
+	key := r.BuildKey(includeAll, list, vocation)
 	return r.cache.SetWithTTL(ctx, key, powerGamers, PowerGamersTTL)
 }
 
-func (r *PowerGamersRepo) Delete(ctx context.Context, includeAll bool) error {
-	key := r.buildKey(includeAll)
+func (r *PowerGamersRepo) Delete(ctx context.Context, includeAll bool, list string, vocation string) error {
+	key := r.BuildKey(includeAll, list, vocation)
 	return r.cache.Delete(ctx, key)
 }
 
-func (r *PowerGamersRepo) buildKey(includeAll bool) string {
+func (r *PowerGamersRepo) BuildKey(includeAll bool, list string, vocation string) string {
+	scope := "page:1"
 	if includeAll {
-		return "powergamers:today:all"
+		scope = "all"
 	}
-	return "powergamers:today:page:1"
+
+	vocationKey := "all"
+	if vocation != "" {
+		vocationKey = vocation
+	}
+
+	return "powergamers:" + list + ":" + vocationKey + ":" + scope
 }
