@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/ethaan/miracle74-api/internal/types"
@@ -64,10 +62,6 @@ func (c *Client) ScrapeCharacter(name string) (*types.Character, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if err := c.saveHTMLForDebug(body, name); err != nil {
-		fmt.Printf("Warning: failed to save HTML for debugging: %v\n", err)
 	}
 
 	character, err := c.parseCharacterHTML(body, name)
@@ -137,10 +131,6 @@ func (c *Client) ScrapePowerGamers(includeAll bool) ([]types.PowerGamer, error) 
 		resp.Body.Close()
 		if err != nil {
 			return nil, fmt.Errorf("failed to read response body for page %d: %w", page, err)
-		}
-
-		if err := c.saveHTMLForDebug(body, fmt.Sprintf("powergamers-page-%d", page)); err != nil {
-			fmt.Printf("Warning: failed to save HTML for debugging: %v\n", err)
 		}
 
 		powerGamers, err := c.parsePowerGamersHTML(body)
@@ -219,10 +209,6 @@ func (c *Client) ScrapeInsomniacs(includeAll bool) ([]types.Insomniac, error) {
 			return nil, fmt.Errorf("failed to read response body for page %d: %w", page, err)
 		}
 
-		if err := c.saveHTMLForDebug(body, fmt.Sprintf("insomniacs-page-%d", page)); err != nil {
-			fmt.Printf("Warning: failed to save HTML for debugging: %v\n", err)
-		}
-
 		insomniacs, err := c.parseInsomniacsHTML(body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse insomniacs data from page %d: %w", page, err)
@@ -289,10 +275,6 @@ func (c *Client) ScrapeGuild(guildID int) (*types.Guild, error) {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	if err := c.saveHTMLForDebug(body, fmt.Sprintf("guild-%d", guildID)); err != nil {
-		fmt.Printf("Warning: failed to save HTML for debugging: %v\n", err)
-	}
-
 	guild, err := c.parseGuildHTML(body, guildID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse guild data: %w", err)
@@ -317,18 +299,18 @@ func (c *Client) parseGuildHTML(htmlContent []byte, guildID int) (*types.Guild, 
 	return guild, nil
 }
 
-func (c *Client) saveHTMLForDebug(htmlContent []byte, name string) error {
-	publicDir := "public"
+// func (c *Client) saveHTMLForDebug(htmlContent []byte, name string) error {
+// 	publicDir := "public"
 
-	if err := os.MkdirAll(publicDir, 0755); err != nil {
-		return fmt.Errorf("failed to create public directory: %w", err)
-	}
+// 	if err := os.MkdirAll(publicDir, 0755); err != nil {
+// 		return fmt.Errorf("failed to create public directory: %w", err)
+// 	}
 
-	filename := filepath.Join(publicDir, fmt.Sprintf("%s.html", name))
-	if err := os.WriteFile(filename, htmlContent, 0644); err != nil {
-		return fmt.Errorf("failed to write HTML file: %w", err)
-	}
+// 	filename := filepath.Join(publicDir, fmt.Sprintf("%s.html", name))
+// 	if err := os.WriteFile(filename, htmlContent, 0644); err != nil {
+// 		return fmt.Errorf("failed to write HTML file: %w", err)
+// 	}
 
-	fmt.Printf("Saved HTML to %s\n", filename)
-	return nil
-}
+// 	fmt.Printf("Saved HTML to %s\n", filename)
+// 	return nil
+// }
