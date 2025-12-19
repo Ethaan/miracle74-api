@@ -14,7 +14,6 @@ tmp/
 
 # Documentation
 README.md
-openapi.yaml
 
 # Public assets (if not needed in container)
 public/
