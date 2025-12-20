@@ -93,7 +93,7 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 	maxPages := 1
 	if includeAll {
-		maxPages = 10
+		maxPages = 3 // Reduced from 10 to avoid rate limiting
 	}
 
 	for page := 1; page <= maxPages; page++ {
@@ -167,8 +167,8 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 		// Add delay between pages to avoid rate limiting
 		if page < maxPages {
-			fmt.Printf("DEBUG: Waiting 3 seconds before fetching next page...\n")
-			time.Sleep(3 * time.Second)
+			fmt.Printf("DEBUG: Waiting 5 seconds before fetching next page...\n")
+			time.Sleep(5 * time.Second)
 		}
 	}
 
@@ -197,7 +197,7 @@ func (c *Client) ScrapeInsomniacs(includeAll bool) ([]types.Insomniac, error) {
 
 	maxPages := 1
 	if includeAll {
-		maxPages = 10
+		maxPages = 3 // Reduced from 10 to avoid rate limiting
 	}
 
 	for page := 1; page <= maxPages; page++ {
