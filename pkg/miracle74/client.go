@@ -113,6 +113,8 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 		q.Set("page", fmt.Sprintf("%d", page))
 		u.RawQuery = q.Encode()
 
+		fmt.Printf("DEBUG: Requesting URL: %s\n", u.String())
+
 		req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create request for page %d: %w", page, err)
@@ -120,21 +122,27 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 		req.Header.Set("User-Agent", "Miracle74-API/0.1.0")
 
+		fmt.Printf("DEBUG: Starting HTTP request for page %d...\n", page)
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
+			fmt.Printf("DEBUG: HTTP request failed for page %d: %v\n", page, err)
 			return nil, fmt.Errorf("failed to fetch page %d: %w", page, err)
 		}
+		fmt.Printf("DEBUG: HTTP request completed for page %d, status: %d\n", page, resp.StatusCode)
 
 		if resp.StatusCode != http.StatusOK {
 			resp.Body.Close()
 			return nil, fmt.Errorf("unexpected status code for page %d: %d", page, resp.StatusCode)
 		}
 
+		fmt.Printf("DEBUG: Reading response body for page %d...\n", page)
 		body, err := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
+			fmt.Printf("DEBUG: Failed to read body for page %d: %v\n", page, err)
 			return nil, fmt.Errorf("failed to read response body for page %d: %w", page, err)
 		}
+		fmt.Printf("DEBUG: Read %d bytes from page %d\n", len(body), page)
 
 		powerGamers, err := c.parsePowerGamersHTML(body)
 		if err != nil {
