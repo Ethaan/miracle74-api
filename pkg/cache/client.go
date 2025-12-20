@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	DefaultTTL = 1 * time.Minute
+	DefaultTTL = 5 * time.Minute
 )
 
 var (
