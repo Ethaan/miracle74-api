@@ -93,7 +93,7 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 	maxPages := 1
 	if includeAll {
-		maxPages = 3 // Reduced from 10 to avoid rate limiting
+		maxPages = 10
 	}
 
 	for page := 1; page <= maxPages; page++ {
@@ -197,7 +197,7 @@ func (c *Client) ScrapeInsomniacs(includeAll bool) ([]types.Insomniac, error) {
 
 	maxPages := 1
 	if includeAll {
-		maxPages = 3 // Reduced from 10 to avoid rate limiting
+		maxPages = 10
 	}
 
 	for page := 1; page <= maxPages; page++ {
