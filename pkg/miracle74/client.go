@@ -123,12 +123,26 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 		req.Header.Set("User-Agent", "Miracle74-API/0.1.0")
 
 		fmt.Printf("DEBUG: Starting HTTP request for page %d...\n", page)
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			fmt.Printf("DEBUG: HTTP request failed for page %d: %v\n", page, err)
-			return nil, fmt.Errorf("failed to fetch page %d: %w", page, err)
+
+		var resp *http.Response
+		// Simple retry logic for rate limiting (429)
+		for attempt := 1; attempt <= 3; attempt++ {
+			resp, err = c.httpClient.Do(req)
+			if err != nil {
+				fmt.Printf("DEBUG: HTTP request failed for page %d: %v\n", page, err)
+				return nil, fmt.Errorf("failed to fetch page %d: %w", page, err)
+			}
+			fmt.Printf("DEBUG: HTTP request completed for page %d, status: %d (attempt %d)\n", page, resp.StatusCode, attempt)
+
+			if resp.StatusCode == 429 && attempt < 3 {
+				resp.Body.Close()
+				waitTime := time.Duration(attempt*2) * time.Second
+				fmt.Printf("DEBUG: Rate limited (429) on page %d, waiting %v before retry %d...\n", page, waitTime, attempt+1)
+				time.Sleep(waitTime)
+				continue
+			}
+			break
 		}
-		fmt.Printf("DEBUG: HTTP request completed for page %d, status: %d\n", page, resp.StatusCode)
 
 		if resp.StatusCode != http.StatusOK {
 			resp.Body.Close()
@@ -151,8 +165,10 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 		allPowerGamers = append(allPowerGamers, powerGamers...)
 
+		// Add delay between pages to avoid rate limiting
 		if page < maxPages {
-			time.Sleep(1 * time.Second)
+			fmt.Printf("DEBUG: Waiting 3 seconds before fetching next page...\n")
+			time.Sleep(3 * time.Second)
 		}
 	}
 
