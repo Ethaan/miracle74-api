@@ -183,6 +183,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
+			case 'w': // Prefix: "whoisonline"
+
+				if l := len("whoisonline"); len(elem) >= l && elem[0:l] == "whoisonline" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetWhoIsOnlineRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+
 			}
 
 		}
@@ -418,6 +438,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.operationID = "getPowerGamers"
 						r.operationGroup = ""
 						r.pathPattern = "/powergamers"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+			case 'w': // Prefix: "whoisonline"
+
+				if l := len("whoisonline"); len(elem) >= l && elem[0:l] == "whoisonline" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = GetWhoIsOnlineOperation
+						r.summary = "Get who is online from miracle74.com"
+						r.operationID = "getWhoIsOnline"
+						r.operationGroup = ""
+						r.pathPattern = "/whoisonline"
 						r.args = args
 						r.count = 0
 						return r, true

@@ -165,7 +165,6 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 		allPowerGamers = append(allPowerGamers, powerGamers...)
 
-		// Add delay between pages to avoid rate limiting
 		if page < maxPages {
 			fmt.Printf("DEBUG: Waiting 5 seconds before fetching next page...\n")
 			time.Sleep(5 * time.Second)
@@ -324,6 +323,66 @@ func (c *Client) parseGuildHTML(htmlContent []byte, guildID int) (*types.Guild, 
 
 	fmt.Printf("DEBUG: Parsed guild with %d members\n", len(guild.Members))
 	return guild, nil
+}
+
+func (c *Client) ScrapeWhoIsOnline(order string) ([]types.OnlinePlayer, error) {
+	u, err := url.Parse(c.baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse base URL: %w", err)
+	}
+
+	q := u.Query()
+	q.Set("subtopic", "whoisonline")
+	if order != "" {
+		q.Set("order", order)
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "Miracle74-API/0.1.0")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch page: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	onlinePlayers, err := c.parseWhoIsOnlineHTML(body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse who is online data: %w", err)
+	}
+
+	fmt.Printf("Successfully scraped %d online players\n", len(onlinePlayers))
+	return onlinePlayers, nil
+}
+
+func (c *Client) parseWhoIsOnlineHTML(htmlContent []byte) ([]types.OnlinePlayer, error) {
+	doc, err := html.Parse(bytes.NewReader(htmlContent))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse HTML: %w", err)
+	}
+
+	onlinePlayers, err := parseWhoIsOnlineData(doc)
+	if err != nil {
+		fmt.Printf("DEBUG: Parser error: %v\n", err)
+		return nil, fmt.Errorf("failed to extract who is online data: %w", err)
+	}
+
+	fmt.Printf("DEBUG: Parsed %d online players\n", len(onlinePlayers))
+	return onlinePlayers, nil
 }
 
 // func (c *Client) saveHTMLForDebug(htmlContent []byte, name string) error {

@@ -180,6 +180,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /whoisonline:
+    get:
+      operationId: getWhoIsOnline
+      summary: Get who is online from miracle74.com
+      description: Fetches and returns list of players currently online. Can be sorted by name, level, or vocation.
+      tags:
+        - whoisonline
+      parameters:
+        - name: order
+          in: query
+          required: false
+          description: Sort order for the online players list
+          schema:
+            type: string
+            enum: [name, level, vocation]
+            default: name
+      responses:
+        '200':
+          description: Successfully scraped who is online data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhoIsOnlineResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     HealthResponse:
@@ -442,3 +472,43 @@ components:
           type: string
           example: Online
           description: Player online status
+
+    WhoIsOnlineResponse:
+      type: object
+      required:
+        - players
+        - total
+      properties:
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnlinePlayer'
+          description: List of all online players
+        total:
+          type: integer
+          example: 15
+          description: Total number of online players
+
+    OnlinePlayer:
+      type: object
+      required:
+        - name
+        - level
+        - vocation
+      properties:
+        name:
+          type: string
+          example: Administrerdoom
+          description: Character name
+        level:
+          type: integer
+          example: 20
+          description: Character level
+        vocation:
+          type: string
+          example: Master Sorcerer
+          description: Character vocation
+        country:
+          type: string
+          example: ve
+          description: Country code

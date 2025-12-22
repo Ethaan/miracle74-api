@@ -59,6 +59,12 @@ type Invoker interface {
 	//
 	// GET /powergamers
 	GetPowerGamers(ctx context.Context, params GetPowerGamersParams) (GetPowerGamersRes, error)
+	// GetWhoIsOnline invokes getWhoIsOnline operation.
+	//
+	// Fetches and returns list of players currently online. Can be sorted by name, level, or vocation.
+	//
+	// GET /whoisonline
+	GetWhoIsOnline(ctx context.Context, params GetWhoIsOnlineParams) (GetWhoIsOnlineRes, error)
 }
 
 // Client implements OAS client.
@@ -577,6 +583,100 @@ func (c *Client) sendGetPowerGamers(ctx context.Context, params GetPowerGamersPa
 
 	stage = "DecodeResponse"
 	result, err := decodeGetPowerGamersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetWhoIsOnline invokes getWhoIsOnline operation.
+//
+// Fetches and returns list of players currently online. Can be sorted by name, level, or vocation.
+//
+// GET /whoisonline
+func (c *Client) GetWhoIsOnline(ctx context.Context, params GetWhoIsOnlineParams) (GetWhoIsOnlineRes, error) {
+	res, err := c.sendGetWhoIsOnline(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetWhoIsOnline(ctx context.Context, params GetWhoIsOnlineParams) (res GetWhoIsOnlineRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getWhoIsOnline"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/whoisonline"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetWhoIsOnlineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/whoisonline"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "order" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Order.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetWhoIsOnlineResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

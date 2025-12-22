@@ -40,6 +40,12 @@ type Handler interface {
 	//
 	// GET /powergamers
 	GetPowerGamers(ctx context.Context, params GetPowerGamersParams) (GetPowerGamersRes, error)
+	// GetWhoIsOnline implements getWhoIsOnline operation.
+	//
+	// Fetches and returns list of players currently online. Can be sorted by name, level, or vocation.
+	//
+	// GET /whoisonline
+	GetWhoIsOnline(ctx context.Context, params GetWhoIsOnlineParams) (GetWhoIsOnlineRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

@@ -60,3 +60,12 @@ func (UnimplementedHandler) GetInsomniacs(ctx context.Context, params GetInsomni
 func (UnimplementedHandler) GetPowerGamers(ctx context.Context, params GetPowerGamersParams) (r GetPowerGamersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
+
+// GetWhoIsOnline implements getWhoIsOnline operation.
+//
+// Fetches and returns list of players currently online. Can be sorted by name, level, or vocation.
+//
+// GET /whoisonline
+func (UnimplementedHandler) GetWhoIsOnline(ctx context.Context, params GetWhoIsOnlineParams) (r GetWhoIsOnlineRes, _ error) {
+	return r, ht.ErrNotImplemented
+}

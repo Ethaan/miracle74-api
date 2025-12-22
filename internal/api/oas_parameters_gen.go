@@ -435,3 +435,88 @@ func decodeGetPowerGamersParams(args [0]string, argsEscaped bool, r *http.Reques
 	}
 	return params, nil
 }
+
+// GetWhoIsOnlineParams is parameters of getWhoIsOnline operation.
+type GetWhoIsOnlineParams struct {
+	// Sort order for the online players list.
+	Order OptGetWhoIsOnlineOrder `json:",omitempty,omitzero"`
+}
+
+func unpackGetWhoIsOnlineParams(packed middleware.Parameters) (params GetWhoIsOnlineParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "order",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Order = v.(OptGetWhoIsOnlineOrder)
+		}
+	}
+	return params
+}
+
+func decodeGetWhoIsOnlineParams(args [0]string, argsEscaped bool, r *http.Request) (params GetWhoIsOnlineParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: order.
+	{
+		val := GetWhoIsOnlineOrder("name")
+		params.Order.SetTo(val)
+	}
+	// Decode query: order.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOrderVal GetWhoIsOnlineOrder
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOrderVal = GetWhoIsOnlineOrder(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Order.SetTo(paramsDotOrderVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Order.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "order",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}

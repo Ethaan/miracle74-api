@@ -228,6 +228,7 @@ func (s *ErrorResponse) SetMessage(val string) {
 
 func (*ErrorResponse) getInsomniacsRes()  {}
 func (*ErrorResponse) getPowerGamersRes() {}
+func (*ErrorResponse) getWhoIsOnlineRes() {}
 
 type GetCharacterInternalServerError ErrorResponse
 
@@ -391,6 +392,54 @@ func (s *GetPowerGamersVocation) UnmarshalText(data []byte) error {
 		return nil
 	case GetPowerGamersVocation4:
 		*s = GetPowerGamersVocation4
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetWhoIsOnlineOrder string
+
+const (
+	GetWhoIsOnlineOrderName     GetWhoIsOnlineOrder = "name"
+	GetWhoIsOnlineOrderLevel    GetWhoIsOnlineOrder = "level"
+	GetWhoIsOnlineOrderVocation GetWhoIsOnlineOrder = "vocation"
+)
+
+// AllValues returns all GetWhoIsOnlineOrder values.
+func (GetWhoIsOnlineOrder) AllValues() []GetWhoIsOnlineOrder {
+	return []GetWhoIsOnlineOrder{
+		GetWhoIsOnlineOrderName,
+		GetWhoIsOnlineOrderLevel,
+		GetWhoIsOnlineOrderVocation,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetWhoIsOnlineOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case GetWhoIsOnlineOrderName:
+		return []byte(s), nil
+	case GetWhoIsOnlineOrderLevel:
+		return []byte(s), nil
+	case GetWhoIsOnlineOrderVocation:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetWhoIsOnlineOrder) UnmarshalText(data []byte) error {
+	switch GetWhoIsOnlineOrder(data) {
+	case GetWhoIsOnlineOrderName:
+		*s = GetWhoIsOnlineOrderName
+		return nil
+	case GetWhoIsOnlineOrderLevel:
+		*s = GetWhoIsOnlineOrderLevel
+		return nil
+	case GetWhoIsOnlineOrderVocation:
+		*s = GetWhoIsOnlineOrderVocation
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -687,6 +736,58 @@ func (s *InsomniacsResponse) SetTotal(val int) {
 
 func (*InsomniacsResponse) getInsomniacsRes() {}
 
+// Ref: #/components/schemas/OnlinePlayer
+type OnlinePlayer struct {
+	// Character name.
+	Name string `json:"name"`
+	// Character level.
+	Level int `json:"level"`
+	// Character vocation.
+	Vocation string `json:"vocation"`
+	// Country code.
+	Country OptString `json:"country"`
+}
+
+// GetName returns the value of Name.
+func (s *OnlinePlayer) GetName() string {
+	return s.Name
+}
+
+// GetLevel returns the value of Level.
+func (s *OnlinePlayer) GetLevel() int {
+	return s.Level
+}
+
+// GetVocation returns the value of Vocation.
+func (s *OnlinePlayer) GetVocation() string {
+	return s.Vocation
+}
+
+// GetCountry returns the value of Country.
+func (s *OnlinePlayer) GetCountry() OptString {
+	return s.Country
+}
+
+// SetName sets the value of Name.
+func (s *OnlinePlayer) SetName(val string) {
+	s.Name = val
+}
+
+// SetLevel sets the value of Level.
+func (s *OnlinePlayer) SetLevel(val int) {
+	s.Level = val
+}
+
+// SetVocation sets the value of Vocation.
+func (s *OnlinePlayer) SetVocation(val string) {
+	s.Vocation = val
+}
+
+// SetCountry sets the value of Country.
+func (s *OnlinePlayer) SetCountry(val OptString) {
+	s.Country = val
+}
+
 // NewOptBool returns new OptBool with value set to v.
 func NewOptBool(v bool) OptBool {
 	return OptBool{
@@ -865,6 +966,52 @@ func (o OptGetPowerGamersVocation) Get() (v GetPowerGamersVocation, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetPowerGamersVocation) Or(d GetPowerGamersVocation) GetPowerGamersVocation {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetWhoIsOnlineOrder returns new OptGetWhoIsOnlineOrder with value set to v.
+func NewOptGetWhoIsOnlineOrder(v GetWhoIsOnlineOrder) OptGetWhoIsOnlineOrder {
+	return OptGetWhoIsOnlineOrder{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetWhoIsOnlineOrder is optional GetWhoIsOnlineOrder.
+type OptGetWhoIsOnlineOrder struct {
+	Value GetWhoIsOnlineOrder
+	Set   bool
+}
+
+// IsSet returns true if OptGetWhoIsOnlineOrder was set.
+func (o OptGetWhoIsOnlineOrder) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetWhoIsOnlineOrder) Reset() {
+	var v GetWhoIsOnlineOrder
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetWhoIsOnlineOrder) SetTo(v GetWhoIsOnlineOrder) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetWhoIsOnlineOrder) Get() (v GetWhoIsOnlineOrder, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetWhoIsOnlineOrder) Or(d GetWhoIsOnlineOrder) GetWhoIsOnlineOrder {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1056,3 +1203,33 @@ func (s *PowerGamersResponse) SetTotal(val int) {
 }
 
 func (*PowerGamersResponse) getPowerGamersRes() {}
+
+// Ref: #/components/schemas/WhoIsOnlineResponse
+type WhoIsOnlineResponse struct {
+	// List of all online players.
+	Players []OnlinePlayer `json:"players"`
+	// Total number of online players.
+	Total int `json:"total"`
+}
+
+// GetPlayers returns the value of Players.
+func (s *WhoIsOnlineResponse) GetPlayers() []OnlinePlayer {
+	return s.Players
+}
+
+// GetTotal returns the value of Total.
+func (s *WhoIsOnlineResponse) GetTotal() int {
+	return s.Total
+}
+
+// SetPlayers sets the value of Players.
+func (s *WhoIsOnlineResponse) SetPlayers(val []OnlinePlayer) {
+	s.Players = val
+}
+
+// SetTotal sets the value of Total.
+func (s *WhoIsOnlineResponse) SetTotal(val int) {
+	s.Total = val
+}
+
+func (*WhoIsOnlineResponse) getWhoIsOnlineRes() {}

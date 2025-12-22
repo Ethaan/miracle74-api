@@ -49,6 +49,19 @@ func (s GetPowerGamersVocation) Validate() error {
 	}
 }
 
+func (s GetWhoIsOnlineOrder) Validate() error {
+	switch s {
+	case "name":
+		return nil
+	case "level":
+		return nil
+	case "vocation":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *GuildResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -143,6 +156,29 @@ func (s *PowerGamersResponse) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "power_gamers",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *WhoIsOnlineResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Players == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "players",
 			Error: err,
 		})
 	}

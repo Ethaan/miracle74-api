@@ -11,4 +11,5 @@ const (
 	GetHealthOperation      OperationName = "GetHealth"
 	GetInsomniacsOperation  OperationName = "GetInsomniacs"
 	GetPowerGamersOperation OperationName = "GetPowerGamers"
+	GetWhoIsOnlineOperation OperationName = "GetWhoIsOnline"
 )

@@ -432,6 +432,101 @@ func findTBody(n *html.Node) *html.Node {
 	return nil
 }
 
+func parseWhoIsOnlineData(doc *html.Node) ([]types.OnlinePlayer, error) {
+	table := findWhoIsOnlineTable(doc)
+	if table == nil {
+		return nil, fmt.Errorf("who is online table not found")
+	}
+
+	rows := findAllTRs(table)
+	if len(rows) == 0 {
+		return nil, fmt.Errorf("no rows found in who is online table")
+	}
+
+	var onlinePlayers []types.OnlinePlayer
+
+	for i, row := range rows {
+		if i == 0 {
+			text := getTextContent(row)
+			if strings.Contains(text, "Name") && strings.Contains(text, "Level") {
+				continue
+			}
+		}
+
+		cells := findAllTDs(row)
+		if len(cells) < 4 {
+			continue
+		}
+
+		country := ""
+		img := findFirstImg(cells[0])
+		if img != nil {
+			src := getAttr(img, "src")
+			if src != "" {
+				parts := strings.Split(src, "/")
+				if len(parts) > 0 {
+					filename := parts[len(parts)-1]
+					country = strings.TrimSuffix(filename, ".gif")
+				}
+			}
+		}
+
+		name := strings.TrimSpace(getTextContent(cells[1]))
+		levelStr := strings.TrimSpace(getTextContent(cells[2]))
+		vocation := strings.TrimSpace(getTextContent(cells[3]))
+
+		if name == "" {
+			continue
+		}
+
+		level, err := strconv.Atoi(levelStr)
+		if err != nil {
+			fmt.Printf("Warning: failed to parse level '%s': %v\n", levelStr, err)
+			continue
+		}
+
+		onlinePlayers = append(onlinePlayers, types.OnlinePlayer{
+			Name:     name,
+			Level:    level,
+			Vocation: vocation,
+			Country:  country,
+		})
+	}
+
+	return onlinePlayers, nil
+}
+
+func findWhoIsOnlineTable(n *html.Node) *html.Node {
+	if n.Type == html.ElementNode && n.Data == "table" {
+		if hasClass(n, "TableContent") && hasClass(n, "InnerBorder") {
+			tbody := findTBody(n)
+			if tbody != nil {
+				return n
+			}
+		}
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if result := findWhoIsOnlineTable(c); result != nil {
+			return result
+		}
+	}
+
+	return nil
+}
+
+func getAttr(n *html.Node, key string) string {
+	if n == nil {
+		return ""
+	}
+	for _, attr := range n.Attr {
+		if attr.Key == key {
+			return attr.Val
+		}
+	}
+	return ""
+}
+
 func parseInsomniacsData(doc *html.Node) ([]types.Insomniac, error) {
 	table := findInsomniacsTable(doc)
 	if table == nil {

@@ -16,3 +16,7 @@ type GetInsomniacsRes interface {
 type GetPowerGamersRes interface {
 	getPowerGamersRes()
 }
+
+type GetWhoIsOnlineRes interface {
+	getWhoIsOnlineRes()
+}
