@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	WhoIsOnlineTTL = 1 * time.Minute
+	WhoIsOnlineTTL = 15 * time.Second
 )
 
 type WhoIsOnlineRepo struct {
