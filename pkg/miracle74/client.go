@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"time"
@@ -120,7 +121,13 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 			return nil, fmt.Errorf("failed to create request for page %d: %w", page, err)
 		}
 
-		req.Header.Set("User-Agent", "Miracle74-API/0.1.0")
+		req.Header.Set("User-Agent",
+			"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "+
+				"AppleWebKit/537.36 (KHTML, like Gecko) "+
+				"Chrome/120.0.0.0 Safari/537.36")
+		req.Header.Set("Accept", "text/html,application/xhtml+xml")
+		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+		req.Header.Set("Connection", "keep-alive")
 
 		fmt.Printf("DEBUG: Starting HTTP request for page %d...\n", page)
 
@@ -136,10 +143,7 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 			if resp.StatusCode == 429 && attempt < 3 {
 				resp.Body.Close()
-				waitTime := time.Duration(attempt*2) * time.Second
-				fmt.Printf("DEBUG: Rate limited (429) on page %d, waiting %v before retry %d...\n", page, waitTime, attempt+1)
-				time.Sleep(waitTime)
-				continue
+				return nil, fmt.Errorf("rate limited by upstream")
 			}
 			break
 		}
@@ -167,7 +171,7 @@ func (c *Client) ScrapePowerGamers(includeAll bool, list string, vocation string
 
 		if page < maxPages {
 			fmt.Printf("DEBUG: Waiting 5 seconds before fetching next page...\n")
-			time.Sleep(5 * time.Second)
+			time.Sleep(time.Duration(4+rand.Intn(5)) * time.Second)
 		}
 	}
 
